@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, PermissionFlagsBits, MessageFlags } = require('discord.js');
+const { SlashCommandBuilder, PermissionFlagsBits, MessageFlags, Role, User } = require('discord.js');
 const Website = require('../models/Website');
 
 module.exports = {
@@ -26,7 +26,6 @@ module.exports = {
 								.setDescription('(Optional) User or role to mention on status changes')
 								.setRequired(false))
 				.setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
-
 		async execute(interaction) {
 				try {
 					await interaction.deferReply({ flags: MessageFlags.Ephemeral });
@@ -72,7 +71,14 @@ module.exports = {
 
 						if (mention) {
 								mentionID = mention.id;
-								mentionText = mention.roles ? `<@&${mentionID}>` : `<@${mentionID}>`;
+
+								if (mention instanceof Role) {
+										mentionText = `<@&${mentionID}>`;
+								} else if (mention instanceof User) {
+										mentionText = `<@${mentionID}>`;
+								} else {
+										mentionText = "Invalid mention";
+								}
 						}
 
 						const newWebsite = new Website({
